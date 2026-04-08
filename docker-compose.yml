@@ -1,3 +1,5 @@
+name: clothing-backend
+
 services:
   api:
     build:
@@ -9,7 +11,7 @@ services:
     ports:
       - "${PORT:-3000}:3000"
     env_file:
-      - .env
+      - docker.env
     volumes:
       - sqlite_data:/app/data
 
