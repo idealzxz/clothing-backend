@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 Int      @id @default(autoincrement())
+  userId             String   @unique
+  openid             String   @unique
+  agreementConfirmed Boolean  @default(false)
+  agreementVersion   String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  pointsAccount      PointsAccount?
+  generationTasks    GenerationTask[]
+  pointsTransactions PointsTransaction[]
+}
+
+model PointsAccount {
+  id               Int      @id @default(autoincrement())
+  userId           String   @unique
+  availableBalance Int      @default(0)
+  frozenBalance    Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+}
+
+model PointsTransaction {
+  id            Int      @id @default(autoincrement())
+  transactionId String   @unique
+  userId        String
+  type          String
+  amount        Int
+  bizId         String
+  balanceBefore Int
+  balanceAfter  Int
+  frozenBefore  Int
+  frozenAfter   Int
+  remark        String?
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([bizId])
+}
+
+model GenerationTask {
+  id              Int      @id @default(autoincrement())
+  taskId          String   @unique
+  userId          String
+  clientRequestId String
+  taskType        String
+  presetId        String
+  ratio           String
+  count           Int
+  assets          Json
+  status          String   @default("queued")
+  providerTaskId  String?
+  resultUrls      Json
+  pointsCost      Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@unique([userId, clientRequestId])
+  @@index([userId, createdAt])
+}
