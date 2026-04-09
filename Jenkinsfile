@@ -50,9 +50,9 @@ pipeline {
             COMPOSE_VER="v2.29.7"
             mkdir -p "${HOME}/.docker/cli-plugins"
             DL="${HOME}/.docker/cli-plugins/docker-compose"
-            URL="https://github.com/docker/compose/releases/download/${COMPOSE_VER}/docker-compose-linux-${COMPOSE_ARCH}"
+            URL="https://mirror.ghproxy.com/https://github.com/docker/compose/releases/download/${COMPOSE_VER}/docker-compose-linux-${COMPOSE_ARCH}"
             if command -v curl >/dev/null 2>&1; then
-              curl -fSL "$URL" -o "$DL"
+              curl -fSL --retry 3 "$URL" -o "$DL"
             elif command -v wget >/dev/null 2>&1; then
               wget -qO "$DL" "$URL"
             else
@@ -102,9 +102,9 @@ pipeline {
             COMPOSE_VER="v2.29.7"
             mkdir -p "${HOME}/.docker/cli-plugins"
             DL="${HOME}/.docker/cli-plugins/docker-compose"
-            URL="https://github.com/docker/compose/releases/download/${COMPOSE_VER}/docker-compose-linux-${COMPOSE_ARCH}"
+            URL="https://mirror.ghproxy.com/https://github.com/docker/compose/releases/download/${COMPOSE_VER}/docker-compose-linux-${COMPOSE_ARCH}"
             if command -v curl >/dev/null 2>&1; then
-              curl -fSL "$URL" -o "$DL"
+              curl -fSL --retry 3 "$URL" -o "$DL"
             else
               wget -qO "$DL" "$URL"
             fi
