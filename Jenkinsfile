@@ -50,13 +50,24 @@ pipeline {
             COMPOSE_VER="v2.29.7"
             mkdir -p "${HOME}/.docker/cli-plugins"
             DL="${HOME}/.docker/cli-plugins/docker-compose"
-            URL="https://mirror.ghproxy.com/https://github.com/docker/compose/releases/download/${COMPOSE_VER}/docker-compose-linux-${COMPOSE_ARCH}"
-            if command -v curl >/dev/null 2>&1; then
-              curl -fSL --retry 3 "$URL" -o "$DL"
-            elif command -v wget >/dev/null 2>&1; then
-              wget -qO "$DL" "$URL"
-            else
-              echo "ERROR: 需要 curl 或 wget 以下载 docker compose，或在镜像中 apt 安装 docker-compose-plugin。"
+            URLS="https://gh-proxy.com/https://github.com/docker/compose/releases/download/${COMPOSE_VER}/docker-compose-linux-${COMPOSE_ARCH} https://ghproxy.net/https://github.com/docker/compose/releases/download/${COMPOSE_VER}/docker-compose-linux-${COMPOSE_ARCH} https://github.com/docker/compose/releases/download/${COMPOSE_VER}/docker-compose-linux-${COMPOSE_ARCH}"
+            SUCCESS=0
+            for URL in $URLS; do
+              echo "Trying $URL ..."
+              if command -v curl >/dev/null 2>&1; then
+                if curl -fSL --connect-timeout 10 --max-time 120 --retry 2 "$URL" -o "$DL"; then
+                  SUCCESS=1
+                  break
+                fi
+              elif command -v wget >/dev/null 2>&1; then
+                if wget -qO "$DL" --timeout=10 --tries=2 "$URL"; then
+                  SUCCESS=1
+                  break
+                fi
+              fi
+            done
+            if [ $SUCCESS -eq 0 ]; then
+              echo "ERROR: Failed to download docker-compose from all mirrors."
               exit 1
             fi
             chmod +x "$DL"
@@ -102,11 +113,25 @@ pipeline {
             COMPOSE_VER="v2.29.7"
             mkdir -p "${HOME}/.docker/cli-plugins"
             DL="${HOME}/.docker/cli-plugins/docker-compose"
-            URL="https://mirror.ghproxy.com/https://github.com/docker/compose/releases/download/${COMPOSE_VER}/docker-compose-linux-${COMPOSE_ARCH}"
-            if command -v curl >/dev/null 2>&1; then
-              curl -fSL --retry 3 "$URL" -o "$DL"
-            else
-              wget -qO "$DL" "$URL"
+            URLS="https://gh-proxy.com/https://github.com/docker/compose/releases/download/${COMPOSE_VER}/docker-compose-linux-${COMPOSE_ARCH} https://ghproxy.net/https://github.com/docker/compose/releases/download/${COMPOSE_VER}/docker-compose-linux-${COMPOSE_ARCH} https://github.com/docker/compose/releases/download/${COMPOSE_VER}/docker-compose-linux-${COMPOSE_ARCH}"
+            SUCCESS=0
+            for URL in $URLS; do
+              echo "Trying $URL ..."
+              if command -v curl >/dev/null 2>&1; then
+                if curl -fSL --connect-timeout 10 --max-time 120 --retry 2 "$URL" -o "$DL"; then
+                  SUCCESS=1
+                  break
+                fi
+              elif command -v wget >/dev/null 2>&1; then
+                if wget -qO "$DL" --timeout=10 --tries=2 "$URL"; then
+                  SUCCESS=1
+                  break
+                fi
+              fi
+            done
+            if [ $SUCCESS -eq 0 ]; then
+              echo "ERROR: Failed to download docker-compose from all mirrors."
+              exit 1
             fi
             chmod +x "$DL"
             COMPOSE="docker compose"
