@@ -21,17 +21,20 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-RUN apk add --no-cache openssl
+# su-exec: lightweight tool to run a command as a different user (like gosu but smaller)
+RUN apk add --no-cache openssl su-exec
 
 COPY --from=builder /app/package.json /app/package-lock.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 
-RUN mkdir -p /app/data && chown -R node:node /app
+RUN mkdir -p /app/data
 
-USER node
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
+# Entrypoint runs as root, fixes volume permissions, runs migrations, then drops to node user
+ENTRYPOINT ["/entrypoint.sh"]
