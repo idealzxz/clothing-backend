@@ -138,7 +138,10 @@ pipeline {
           }
           ensure_compose
           ${COMPOSE} ps
-          ${COMPOSE} exec -T api node -e "fetch('http://127.0.0.1:3000/api/docs').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+          echo "Waiting for api to be ready..."
+          sleep 5
+          ${COMPOSE} logs api
+          ${COMPOSE} exec -T api node -e "fetch('http://127.0.0.1:3000/api/docs').then(r=>{console.log('HTTP Status:', r.status); process.exit(r.ok?0:1)}).catch((e)=>{console.error('Fetch Error:', e.message); process.exit(1)})"
           echo "Smoke OK。宿主机浏览器打开: http://<宿主机IP>:${APP_PORT}/api/docs"
         '''
       }
