@@ -33,6 +33,11 @@ export class CreateJimengTaskDto {
   @IsIn(['photo', 'video'])
   taskType!: 'photo' | 'video';
 
+  @ApiPropertyOptional({ description: '生成提示词（即梦4.0 prompt）' })
+  @IsOptional()
+  @IsString()
+  prompt?: string;
+
   @ApiProperty({ description: '预设 ID' })
   @IsString()
   presetId!: string;
